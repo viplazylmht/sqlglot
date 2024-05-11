@@ -25,6 +25,7 @@ from sqlglot.dialects.dialect import (
     timestrtotime_sql,
     ts_or_ds_add_cast,
     unit_to_var,
+    HASH_FUNCTION_PARSER,
 )
 from sqlglot.helper import seq_get, split_num_words
 from sqlglot.tokens import TokenType
@@ -313,6 +314,7 @@ class BigQuery(Dialect):
 
         FUNCTIONS = {
             **parser.Parser.FUNCTIONS,
+            **HASH_FUNCTION_PARSER,
             "DATE": _build_date,
             "DATE_ADD": build_date_delta_with_interval(exp.DateAdd),
             "DATE_SUB": build_date_delta_with_interval(exp.DateSub),
@@ -330,7 +332,6 @@ class BigQuery(Dialect):
             "JSON_EXTRACT_SCALAR": lambda args: exp.JSONExtractScalar(
                 this=seq_get(args, 0), expression=seq_get(args, 1) or exp.Literal.string("$")
             ),
-            "MD5": exp.MD5Digest.from_arg_list,
             "TO_HEX": _build_to_hex,
             "PARSE_DATE": lambda args: build_formatted_time(exp.StrToDate, "bigquery")(
                 [seq_get(args, 1), seq_get(args, 0)]
@@ -344,8 +345,6 @@ class BigQuery(Dialect):
                 occurrence=seq_get(args, 3),
                 group=exp.Literal.number(1) if re.compile(args[1].name).groups == 1 else None,
             ),
-            "SHA256": lambda args: exp.SHA2(this=seq_get(args, 0), length=exp.Literal.number(256)),
-            "SHA512": lambda args: exp.SHA2(this=seq_get(args, 0), length=exp.Literal.number(512)),
             "SPLIT": lambda args: exp.Split(
                 # https://cloud.google.com/bigquery/docs/reference/standard-sql/string_functions#split
                 this=seq_get(args, 0),

@@ -19,6 +19,11 @@ DATE_ADD_OR_DIFF = t.Union[exp.DateAdd, exp.TsOrDsAdd, exp.DateDiff, exp.TsOrDsD
 DATE_ADD_OR_SUB = t.Union[exp.DateAdd, exp.TsOrDsAdd, exp.DateSub]
 JSON_EXTRACT_TYPE = t.Union[exp.JSONExtract, exp.JSONExtractScalar]
 
+HASH_FUNCTION_PARSER: t.Dict[str, t.Callable[[t.List], exp.Func]] = {
+    "MD5": exp.MD5Digest.from_arg_list,
+    "SHA256": lambda args: exp.SHA2(this=seq_get(args, 0), length=exp.Literal.number(256)),
+    "SHA512": lambda args: exp.SHA2(this=seq_get(args, 0), length=exp.Literal.number(512)),
+}
 
 if t.TYPE_CHECKING:
     from sqlglot._typing import B, E, F

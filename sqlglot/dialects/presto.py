@@ -27,6 +27,7 @@ from sqlglot.dialects.dialect import (
     timestrtotime_sql,
     ts_or_ds_add_cast,
     unit_to_str,
+    HASH_FUNCTION_PARSER,
 )
 from sqlglot.dialects.hive import Hive
 from sqlglot.dialects.mysql import MySQL
@@ -233,6 +234,7 @@ class Presto(Dialect):
 
         FUNCTIONS = {
             **parser.Parser.FUNCTIONS,
+            **HASH_FUNCTION_PARSER,
             "ARBITRARY": exp.AnyValue.from_arg_list,
             "APPROX_DISTINCT": exp.ApproxDistinct.from_arg_list,
             "APPROX_PERCENTILE": _build_approx_percentile,
@@ -281,9 +283,6 @@ class Presto(Dialect):
             "TO_UTF8": lambda args: exp.Encode(
                 this=seq_get(args, 0), charset=exp.Literal.string("utf-8")
             ),
-            "MD5": exp.MD5Digest.from_arg_list,
-            "SHA256": lambda args: exp.SHA2(this=seq_get(args, 0), length=exp.Literal.number(256)),
-            "SHA512": lambda args: exp.SHA2(this=seq_get(args, 0), length=exp.Literal.number(512)),
         }
 
         FUNCTION_PARSERS = parser.Parser.FUNCTION_PARSERS.copy()

@@ -15,6 +15,7 @@ from sqlglot.dialects.dialect import (
     build_json_extract_path,
     rename_func,
     var_map_sql,
+    HASH_FUNCTION_PARSER,
 )
 from sqlglot.helper import is_int, seq_get
 from sqlglot.tokens import Token, TokenType
@@ -120,6 +121,7 @@ class ClickHouse(Dialect):
 
         FUNCTIONS = {
             **parser.Parser.FUNCTIONS,
+            **HASH_FUNCTION_PARSER,
             "ANY": exp.AnyValue.from_arg_list,
             "ARRAYSUM": exp.ArraySum.from_arg_list,
             "COUNTIF": _build_count_if,
@@ -146,9 +148,6 @@ class ClickHouse(Dialect):
             "TUPLE": exp.Struct.from_arg_list,
             "UNIQ": exp.ApproxDistinct.from_arg_list,
             "XOR": lambda args: exp.Xor(expressions=args),
-            "MD5": exp.MD5Digest.from_arg_list,
-            "SHA256": lambda args: exp.SHA2(this=seq_get(args, 0), length=exp.Literal.number(256)),
-            "SHA512": lambda args: exp.SHA2(this=seq_get(args, 0), length=exp.Literal.number(512)),
         }
 
         AGG_FUNCTIONS = {
