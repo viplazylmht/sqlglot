@@ -420,6 +420,16 @@ def _qualify_columns(scope: Scope, resolver: Resolver) -> None:
                 column.set("table", exp.to_identifier(scope.pivots[0].alias))
                 continue
 
+            alias_selects = {
+                alias.alias: alias
+                for alias in scope.expression.selects
+                if isinstance(alias, exp.Alias)
+            }
+            alias = alias_selects.get(column_name)
+            if alias:
+                column.replace(alias.this)
+                continue
+
             # column_table can be a '' because bigquery unnest has no table alias
             column_table = resolver.get_table(column_name)
             if column_table:
